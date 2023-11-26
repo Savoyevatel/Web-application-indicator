@@ -15,10 +15,15 @@ def greet():
 @app.route('/greeting/<name>')
 def greeting(name):
     moves, img, user = parsing(name)
-    var1 = moves
-    var2 = img
-    var3 = user
-    return render_template('greeting.html', var1=var1, var2=var2, var3=var3)
+
+    if moves:
+        var1 = moves
+        var2 = img
+        var3 = user
+        return render_template('greeting.html', var1=var1, var2=var2, var3=var3)
+
+    else:
+        return redirect(url_for('index'))    
    
 if __name__ == '__main__':
     app.run(debug=True)
