@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocketIO Two Players</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+</head>
+<body>
+    <h1>SocketIO Two Players</h1>
+    <div id="messages"></div>
+    <form id="message-form">
+        <input type="text" id="message-input" placeholder="Enter message">
+        <button type="submit">Send</button>
+    </form>
+
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('message', function(message) {
+            var messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML += '<p>' + message + '</p>';
+        });
+
+        document.getElementById('message-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var messageInput = document.getElementById('message-input');
+            socket.emit('message', messageInput.value);
+            messageInput.value = '';
+        });
+    </script>
+</body>
+</html>
