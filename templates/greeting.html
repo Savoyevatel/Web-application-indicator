@@ -35,6 +35,19 @@
             width: 200px;
             height: auto;
         }
+        #health-bar {
+            position: absolute;
+            bottom: 370px;
+            left: 20px;
+            background-color: #ddd;
+            height: 20px;
+            width: 150px;
+        }
+
+        #current-health {
+            height: 100%;
+            background-color: #4caf50;
+        }
     </style>
 </head>
 
@@ -42,15 +55,21 @@
     <div id="container">
         <button id="main-button" onclick="showAdditionalButtons()">Fight</button>
         <img id="pokemon-gif" src="{{ var2 }}" alt="{{ var3 }} GIF">
-        <div class="additional-buttons-top">
-            {% for move, damage in var1.items() %}
-                <button onclick="useMove('{{ move }}', {{ damage }})">{{ move }}</button>
-            {% endfor %}
-        </div>
-        <div class="additional-buttons-bot">
-            {% for move, damage in var1.items() %}
-                <button onclick="useMove('{{ move }}', {{ damage }})">{{ move }}</button>
-            {% endfor %}
+        <!-- https://images.wikidexcdn.net/mwuploads/wikidex/4/4c/latest/20230618123906/Salamence_EP_variocolor.gif -->
+        <div id="player-info">
+            <div id="health-bar">
+                <div class="current-health"></div>
+            </div>
+            <div class="additional-buttons-top">
+                {% for move, damage in var1.items() %}
+                    <button onclick="useMove('{{ move }}', {{ damage }})">{{ move }}</button>
+                {% endfor %}
+            </div>
+            <div class="additional-buttons-bot">
+                {% for move, damage in var1.items() %}
+                    <button onclick="useMove('{{ move }}', {{ damage }})">{{ move }}</button>
+                {% endfor %}
+            </div>
         </div>
     </div>
 
