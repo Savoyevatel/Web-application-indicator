@@ -5,6 +5,9 @@ from flask_socketio import SocketIO
 app = Flask(__name__)
 socketio = SocketIO(app)
 
+#list of players
+players = {}
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -13,6 +16,7 @@ def index():
 def greet():
     name = request.form.get('name')
     return redirect(url_for('greeting', name=name))
+
 
 @app.route('/greeting/<name>')
 def greeting(name):
@@ -26,15 +30,26 @@ def greeting(name):
 
     else:
         return redirect(url_for('index')) 
-   
+
 @socketio.on('attack')
-def handle_attack(data):
+def handle_attack_P(data):
+    player_id = request.sid
+    player_health = 1000
     move_name = data['move_name']
     damage = data['damage']
-    player_id = request.sid
+    print(f"Received from Player {player_id}: {damage}")
     print(f"Player {player_id} used attack: {move_name} with {damage} damage")
-    #print(f"Used attack: {move_name} with {damage} damage")
-    socketio.emit('update_player_info', {'player_id': player_id, 'health': 50}) 
+    player2_health -= damage
+    print(f"Player 2 current health after {move_name} is {player2_health}")
+    #health = players.get(player_id, {'health': 100})['health']
+    #health -= damage
+    #health = max(0, health)
+    #players[player_id] = {'health': health}
+
+    #socketio.emit('update_player_2', {'player_id': player_id, 'health': health})
+    #socketio.emit('message_to_player2', damage, broadcast=True)
+    socketio.emit('message_to_player2', damage)
+    socketio.emit('update_health', player2_health)
 
 if __name__ == '__main__':
     app.run(debug=True)
