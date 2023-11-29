@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player 1</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        #container {
+            position: relative;
+            height: 100vh;
+        }
+        #main-button {
+            position: absolute;
+            bottom: 10px;
+            left: 100px;
+        }
+        .additional-buttons-top,
+        .additional-buttons-bot {
+            position: absolute;
+            bottom: 40px;
+            left: 10px;
+            display: none;
+        }
+
+        #pokemon-gif {
+            position: absolute;
+            bottom: 150px;
+            left: 100px;
+            transform: translateX(-50%);
+            width: 200px;
+            height: auto;
+        }
+        #health-bar {
+            position: absolute;
+            bottom: 370px;
+            left: 20px;
+            background-color: #4caf50;
+            height: 20px;
+            width: 150px;
+        }
+
+        #current-health {
+            height: 100%;
+            background-color: #654caf;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="Player 1">
+        <button id="main-button" onclick="showAdditionalButtons()">Fight</button>
+        <img id="pokemon-gif" src="{{ var2 }}" alt="{{ var3 }} GIF">
+        <!-- https://images.wikidexcdn.net/mwuploads/wikidex/4/4c/latest/20230618123906/Salamence_EP_variocolor.gif -->
+        <div id="player-info">
+            <!--<div id="health-bar">
+                <div class="current-health"></div>
+            </div> -->
+            <div>
+                <h3>Health: {{ player_health }}</h3>
+                <div id="health-bar" style="width: {{ player_health }}%"></div>
+            </div>
+
+            <div class="additional-buttons-top">
+                {% for move, damage in var1.items() %}
+                    <button onclick="useMove('{{ move }}', {{ damage }})">{{ move }}</button>
+                {% endfor %}
+            </div>
+            <div class="additional-buttons-bot">
+                {% for move, damage in var1.items() %}
+                    <button onclick="useMove('{{ move }}', {{ damage }})">{{ move }}</button>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        function showAdditionalButtons() {
+            var mainButton = document.getElementById('main-button');
+            var additionalButtonsTop = document.querySelector('.additional-buttons-top');
+            var additionalButtonsBot = document.querySelector('.additional-buttons-bot');
+
+            mainButton.style.display = 'none';
+
+            additionalButtonsTop.style.display = 'block';
+            additionalButtonsBot.style.display = 'block';
+        }
+
+        function useMove(moveName, damage) {
+            socket.emit('attack from player 2', {'move_name': moveName, 'damage': damage});
+            console.log('Using move:', moveName, 'with', damage, 'damage');
+        }
+        socket.on('message_to_player1', function (damage) {
+            console.log('Received damage to Player 1:', damage);
+        });
+        socket.on('update_health', function (data) {
+            console.log('Health update:', data);
+            document.getElementById('health-bar').style.width = data.player1 + '%';
+        });
+    </script>
+
+</body>
+</html>
