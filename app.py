@@ -7,6 +7,7 @@ socketio = SocketIO(app)
 
 #list of players
 players = {}
+damage = 0
 
 @app.route('/')
 def index():
@@ -16,7 +17,6 @@ def index():
 def greet():
     name = request.form.get('name')
     return redirect(url_for('greeting', name=name))
-
 
 @app.route('/greeting/<name>')
 def greeting(name):
@@ -30,25 +30,19 @@ def greeting(name):
 
     if not moves:
         return render_template('index.html', error="Please enter a valid pokemon name") 
-        #return redirect(url_for('index')) 
 
 @socketio.on('attack from player 1')
 def handle_attack(data):
     global players
+    global damage
     move_name = data['move_name']
-    damage = data['damage']
+    curr_damage = data['damage']
     player_id = request.sid
-
-    print(f"Player {player_id} used attack: {move_name} with {damage} damage")
-
-    damage_d = players.get(player_id, {'damage_d': 0})['damage_d']
-    damage_d += damage
-    players[player_id] = {'damage_d': damage_d}
- 
-    #socketio.emit('update_player_info', {'player_id': player_id, 'health': health})
-    #socketio.emit(health, to=greeting)
+    players[str(player_id)] = damage
+    damage += data['damage']
+    print(f"Player {player_id} used attack: {move_name} with {curr_damage} damage")
+    players[str(player_id)] = damage
     print(players)
-    players = {key: {'damage_d': value['damage_d']} for key, value in players.items()}
-    print(players)
+
 if __name__ == '__main__':
     socketio.run(app, debug=True)
