@@ -7,7 +7,7 @@ socketio = SocketIO(app)
 
 #list of players
 players = {}
-
+ini_damage = 0
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -16,6 +16,7 @@ def index():
 def greet():
     name = request.form.get('name')
     return redirect(url_for('greeting', name=name))
+
 
 @app.route('/greeting/<name>')
 def greeting(name):
@@ -27,28 +28,39 @@ def greeting(name):
         var3 = user
         return render_template('greeting.html', var1=var1, var2=var2, var3=var3)
 
-    else:
-        return redirect(url_for('index')) 
-   
+    if not moves:
+        return render_template('index.html', error="Please enter a valid pokemon name") 
+        #return redirect(url_for('index')) 
+
 @socketio.on('attack from player 1')
-def handle_attack_P1(data):
+def handle_attack(data):
     move_name = data['move_name']
     damage = data['damage']
     player_id = request.sid
+    players[str(player_id)] = damage
+    print(players)
+
     print(f"Player {player_id} used attack: {move_name} with {damage} damage")
-    #health = players.get(player_id, {'health': 100})['health']
-    #health -= damage
-    #health = max(0, health)
-    #players[player_id] = {'health': health}
-
-    #socketio.emit('update_player_2', {'player_id': player_id, 'health': health})
-    #socketio.emit('message_to_player2', damage, broadcast=True)
-    socketio.emit('message_to_player2', damage)
-
-@socketio.on('attack from player 2')
-def handle_attack_P2(data):
+    players[player_id] += damage
     damage = data['damage']
-    socketio.emit('message_to_player1', damage)
+    print(players)
+    '''
+    health = players.get(player_id, {'health': 1000})['health']
 
+    damage_d = players.get(player_id, {'damage_d': 0})['damage_d']
+    damage_d += damage
+    health -= damage
+
+    health = max(0, health)
+
+    players[player_id] = {'health': health}
+    players[player_id]['damage_d'] = damage_d
+    print(players)
+    print(health)
+    socketio.emit('update_player_info', health)
+    #socketio.emit(health, to=greeting)
+    #socketio.emit(health, {'health': health}, namespace='/greeting')
+    '''
+    
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, debug=True)
