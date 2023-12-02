@@ -7,7 +7,7 @@ socketio = SocketIO(app)
 
 #list of players
 players = {}
-ini_damage = 0
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -34,33 +34,21 @@ def greeting(name):
 
 @socketio.on('attack from player 1')
 def handle_attack(data):
+    global players
     move_name = data['move_name']
     damage = data['damage']
     player_id = request.sid
-    players[str(player_id)] = damage
-    print(players)
 
     print(f"Player {player_id} used attack: {move_name} with {damage} damage")
-    players[player_id] += damage
-    damage = data['damage']
-    print(players)
-    '''
-    health = players.get(player_id, {'health': 1000})['health']
 
     damage_d = players.get(player_id, {'damage_d': 0})['damage_d']
     damage_d += damage
-    health -= damage
-
-    health = max(0, health)
-
-    players[player_id] = {'health': health}
-    players[player_id]['damage_d'] = damage_d
-    print(players)
-    print(health)
-    socketio.emit('update_player_info', health)
+    players[player_id] = {'damage_d': damage_d}
+ 
+    #socketio.emit('update_player_info', {'player_id': player_id, 'health': health})
     #socketio.emit(health, to=greeting)
-    #socketio.emit(health, {'health': health}, namespace='/greeting')
-    '''
-    
+    print(players)
+    players = {key: {'damage_d': value['damage_d']} for key, value in players.items()}
+    print(players)
 if __name__ == '__main__':
     socketio.run(app, debug=True)
