@@ -1,13 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for
 from parsing_moveset import *
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 socketio = SocketIO(app)
 
-#list of players
 players = {}
 damage = 0
+health = 1000
+damage_d = 0
 
 @app.route('/')
 def index():
@@ -34,15 +35,22 @@ def greeting(name):
 @socketio.on('attack from player 1')
 def handle_attack(data):
     global players
-    global damage
-    move_name = data['move_name']
-    curr_damage = data['damage']
+    global health
     player_id = request.sid
-    players[str(player_id)] = damage
-    damage += data['damage']
-    print(f"Player {player_id} used attack: {move_name} with {curr_damage} damage")
-    players[str(player_id)] = damage
-    print(players)
+    print(player_id)
+    move_name = data['move_name']
+    damage = data['damage']
+
+    print(f"Player {player_id} used attack: {move_name} with {damage} damage")
+
+    damage_d = players.get(player_id, {'damage_d': 1000})['damage_d']
+    damage_d -= damage
+    players[player_id] = {'damage_d': damage_d}
+    health -= damage_d
+    health = max(0,health)
+    emit('update_health', {'damage_d': damage_d}, room=player_id)
+
+
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
