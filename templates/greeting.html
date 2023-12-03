@@ -39,26 +39,27 @@
             position: absolute;
             bottom: 370px;
             left: 20px;
-            background-color: #4caf50;
+            background-color: Tomato;
             height: 20px;
             width: 150px;
         }
 
         #current-health {
             height: 100%;
-            background-color: #654caf;
+            background-color: #4caf50;
         }
     </style>
 </head>
 
 <body>
+    <h1>{{var4}}</h1>
     <div id="Player 1">
         <button id="main-button" onclick="showAdditionalButtons()">Fight</button>
         <img id="pokemon-gif" src="{{ var2 }}" alt="{{ var3 }} GIF">
-        <!-- https://images.wikidexcdn.net/mwuploads/wikidex/4/4c/latest/20230618123906/Salamence_EP_variocolor.gif -->
         <div id="player-info">
+            
             <div id="health-bar">
-                <div class="current-health"></div>
+                <div id="current-health"></div>
             </div>
             <div class="additional-buttons-top">
                 {% for move, damage in var1.items() %}
@@ -89,12 +90,20 @@
 
         function useMove(moveName, damage) {
             socket.emit('attack from player 1', {'move_name': moveName, 'damage': damage});
+            
+            // Update the health bar
+            updateHealthBar(damage);
+
             console.log('Using move:', moveName, 'with', damage, 'damage');
         }
-        socket.on('message_to_player1', function (damage) {
-            console.log('Received damage to Player 1:', damage);
-        });
-    </script>
 
+        function updateHealthBar(damage) {
+            var healthBar = document.getElementById('current-health');
+            var currentWidth = healthBar.style.width.replace('%', '') || 100;
+            var newWidth = Math.max(0, currentWidth - damage/10) + '%';
+
+            healthBar.style.width = newWidth;
+        }
+    </script>
 </body>
 </html>
