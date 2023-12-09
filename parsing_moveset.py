@@ -22,7 +22,12 @@ def parsing(user):
             meta_tag = soup.find('meta', {'property': 'og:image'})
 
             # find image link
-            image_link = meta_tag.get('content') if meta_tag else None
+            #new image
+            meta_image = user.title()
+            image_link = f'https://professorlotus.com/Sprites/{meta_image}.gif'
+
+            #static image
+            #image_link = meta_tag.get('content') if meta_tag else None
 
             # fiding all <a> tags with href attributes containing keyword "/move/"
             matching_links = soup.find_all('a', href=lambda value: value and '/move/' in value)
