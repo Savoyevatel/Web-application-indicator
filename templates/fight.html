@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player 1</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        #container {
+            position: relative;
+            height: 100vh;
+        }
+        #main-button {
+            position: absolute;
+            bottom: 10px;
+            left: 100px;
+        }
+        .additional-buttons-top,
+        .additional-buttons-bot {
+            position: absolute;
+            bottom: 40px;
+            left: 10px;
+            display: none;
+        }
+
+        #pokemon-gif {
+            position: absolute;
+            bottom: 150px;
+            left: 100px;
+            transform: translateX(-50%);
+            width: 200px;
+            height: auto;
+        }
+
+        #pokemon2-gif {
+            position: absolute;
+            top: 150px;
+            right: 50px;
+            transform: translateX(-50%);
+            width: 200px;
+            height: auto;
+        }
+
+
+        #health-bar {
+            position: absolute;
+            bottom: 400px;
+            left: 20px;
+            background-color: Tomato;
+            height: 20px;
+            width: 150px;
+        }
+
+        #health2-bar {
+            position: absolute;
+            top: 100px;
+            right: 160px;
+            background-color: Tomato;
+            height: 20px;
+            width: 150px;
+        }
+
+        #current-health {
+            height: 100%;
+            background-color: #4caf50;
+        }
+
+        #current2-health {
+            height: 100%;
+            background-color: #4caf50;
+        }
+
+    </style>
+</head>
+
+<body>
+    <!-- <h1>{{var4}}</h1> -->
+    <div id="Player 1">
+        <button id="main-button" onclick="showAdditionalButtons()">Fight</button>
+        <img id="pokemon-gif" src="{{ var2 }}" alt="{{ var3 }} GIF" width="50" height="60">
+        
+        
+        <div id="player-info">
+            
+            <div id="health-bar">
+                <div id="current-health"></div>
+            </div>
+
+            <div id="health2-bar">
+                <div id="current2-health"></div>
+            </div>
+
+
+            <div class="additional-buttons-top" id="player1-buttons">
+                {% for move, damage in var1.items() %}
+                    <button onclick="useMove('{{ move }}', {{ damage }})" id="{{ move }}">{{ move }}</button>
+                {% endfor %}
+            </div>
+            
+            <div class="additional-buttons-bot" id="player2-buttons">
+                {% for move, damage in var1.items() %}
+                    <button onclick="useMove('{{ move }}', {{ damage }})" id="{{ move }}">{{ move }}</button>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        var totalDamage = 0;
+        var isPlayer1Turn = true;  // Variable to track the current turn
+    
+        socket.on('health_update', function(data) {
+            var health = data['health'];
+            updateHealthBar(health);
+            updateHealthBar2(totalDamage);
+        });
+    
+        socket.on('image', function(data) {
+            var imgSrc = data['img'];
+            var pokemon2Gif = document.getElementById('pokemon2-gif');
+            pokemon2Gif.src = imgSrc;
+        });
+    
+        function showAdditionalButtons() {
+            var mainButton = document.getElementById('main-button');
+            var player1Buttons = document.getElementById('player1-buttons');
+            var player2Buttons = document.getElementById('player2-buttons');
+    
+            mainButton.style.display = 'none';
+    
+            if (isPlayer1Turn) {
+                player1Buttons.style.display = 'block';
+                player2Buttons.style.display = 'none';
+            } else {
+                player1Buttons.style.display = 'none';
+                player2Buttons.style.display = 'block';
+            }
+        }
+    
+        function useMove(moveName, damage) {
+            if (isPlayer1Turn) {
+                socket.emit('attack from player 1', {'move_name': moveName, 'damage': damage});
+                totalDamage += damage;
+                disableButtons('player1-buttons');
+            } else {
+
+                disableButtons('player2-buttons');
+            }
+
+        // Switch turns
+            isPlayer1Turn = !isPlayer1Turn;
+
+            // Enable buttons for the next player's turn
+            var currentPlayerButtonsId = isPlayer1Turn ? 'player1-buttons' : 'player2-buttons';
+            enableButtons(currentPlayerButtonsId);
+
+            console.log('Using move:', moveName, 'with', damage, 'damage');
+        }
+
+
+        function enableButtons(containerId) {
+            var buttonsContainer = document.getElementById(containerId);
+            var buttons = buttonsContainer.getElementsByTagName('button');
+
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = false;
+            }
+        }
+
+        function disableButtons(containerId) {
+            var buttonsContainer = document.getElementById(containerId);
+            var buttons = buttonsContainer.getElementsByTagName('button');
+
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = true;
+            }
+        }
+    
+        function updateHealthBar(health) {
+            var healthBar = document.getElementById('current-health');
+            var newWidth = (health / 1000) * 100 + '%';
+            healthBar.style.width = newWidth;
+        }
+    
+        function updateHealthBar2(totalDamage) {
+            var healthBar = document.getElementById('current2-health');
+            var currentHealth = 1000 - totalDamage;
+            var newWidth = (currentHealth / 1000) * 100 + '%';
+            healthBar.style.width = newWidth;
+
+            // Enable buttons when health gets lower
+            if (currentHealth < 1000) {
+                enableButtons('player1-buttons');
+            }
+        }
+    </script>
+    <img id="pokemon2-gif" src="">
+    </body>
+    </html>

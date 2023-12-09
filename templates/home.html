@@ -1,0 +1,23 @@
+{% extends 'base.html' %} {% block content %}
+<form method="post" class="buttons">
+  <h1 style="color:#5A8F3A;">Welcome!</h1>
+  <div>
+    <label style="color:#8F8F3A;">Choose a name</label>
+    <input
+      type="text"
+      name="name"
+      value="{{name}}"
+    />
+  </div>
+  <div class="join">
+    <input type="text" name="code" value="{{code}}" />
+    <button type="submit" name="join">Join</button>
+  </div>
+  <button type="submit" name="create" class="create-btn">Create</button>
+  {% if error %}
+  <ul>
+    <h3 style="color:Tomato;">{{error}}</h3>
+  </ul>
+  {% endif %}
+</form>
+{% endblock %}
