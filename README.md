@@ -1,4 +1,4 @@
-# Web-application-pokemon
+# Web-application-pokemon-turn-based
 
 Using web scraping to get the pokemon attacks and flask Sockets to create a commucation server between both players with chat.
 
@@ -10,3 +10,6 @@ $env:FLASK_APP = "app"
 flask run
 
 ```
+
+## Web application turn based
+![gif_fight](images/gif_fight.gif)
